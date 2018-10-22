@@ -192,7 +192,7 @@ QUnit.test("dxshown event fire when visible option changed to true", function(as
     $(form.$element())
         .find(".dx-visibility-change-handler")
         .first()
-        .on("dxshown", function() {
+        .on("dxsдаhown", function() {
             dxShownEventCounter++;
         });
 
@@ -2604,9 +2604,9 @@ QUnit.test("Form redraw layout when colCount is 'auto' and an calculated colCoun
 });
 
 
-QUnit.module("Regression");
+QUnit.module("Events");
 
-QUnit.test("Should not skip `optionChanged` event handler that has been added on the `onInitialized` event handler (T677091)", function(assert) {
+QUnit.test("Should not skip `optionChanged` event handler that has been added on the `onInitialized` event handler", function(assert) {
     var eventCalls = [];
 
     var form = $("#form").dxForm({
