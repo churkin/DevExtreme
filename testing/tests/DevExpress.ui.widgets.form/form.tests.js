@@ -192,7 +192,7 @@ QUnit.test("dxshown event fire when visible option changed to true", function(as
     $(form.$element())
         .find(".dx-visibility-change-handler")
         .first()
-        .on("dxsдаhown", function() {
+        .on("dxshown", function() {
             dxShownEventCounter++;
         });
 
