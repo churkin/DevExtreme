@@ -500,8 +500,8 @@ QUnit.test("correct order of buttons when widget is rendered", function(assert) 
         }),
         $buttons = $element.find(".dx-texteditor-buttons-container").children();
 
-    assert.ok($buttons.eq(0).hasClass("dx-numberbox-spin-container"), "spin buttons are the first");
-    assert.ok($buttons.eq(1).hasClass("dx-clear-button-area"), "clear button is the second");
+    assert.ok($buttons.eq(0).hasClass("dx-clear-button-area"), "clear button is the first");
+    assert.ok($buttons.eq(1).hasClass("dx-numberbox-spin-container"), "spin buttons are the second");
 });
 
 QUnit.test("correct order of buttons when clear button option is set after rendering", function(assert) {
@@ -514,8 +514,8 @@ QUnit.test("correct order of buttons when clear button option is set after rende
 
     var $buttons = $element.find(".dx-texteditor-buttons-container").children();
 
-    assert.ok($buttons.eq(0).hasClass("dx-numberbox-spin-container"), "spin buttons are the first");
-    assert.ok($buttons.eq(1).hasClass("dx-clear-button-area"), "clear button is the second");
+    assert.ok($buttons.eq(0).hasClass("dx-clear-button-area"), "clear button is the first");
+    assert.ok($buttons.eq(1).hasClass("dx-numberbox-spin-container"), "spin buttons are the second");
 });
 
 QUnit.test("correct order of buttons when spin buttons option is set after rendering", function(assert) {
@@ -528,8 +528,8 @@ QUnit.test("correct order of buttons when spin buttons option is set after rende
 
     var $buttons = $element.find(".dx-texteditor-buttons-container").children();
 
-    assert.ok($buttons.eq(0).hasClass("dx-numberbox-spin-container"), "spin buttons are the first");
-    assert.ok($buttons.eq(1).hasClass("dx-clear-button-area"), "clear button is the second");
+    assert.ok($buttons.eq(0).hasClass("dx-clear-button-area"), "clear button is the first");
+    assert.ok($buttons.eq(1).hasClass("dx-numberbox-spin-container"), "spin buttons are the second");
 });
 
 QUnit.test("clear button should save valueChangeEvent", function(assert) {
@@ -1064,7 +1064,7 @@ QUnit.test("value starts from decimal", function(assert) {
 });
 
 QUnit.test("showSpinButtons", function(assert) {
-    assert.expect(6);
+    assert.expect(5);
 
     assert.ok(!this.element.hasClass(SPIN_CLASS), "on default spin classes aren't applied");
     var $spinContainer = this.element.find("." + SPIN_CONTAINER_CLASS);
@@ -1078,7 +1078,6 @@ QUnit.test("showSpinButtons", function(assert) {
     this.instance.option("showSpinButtons", false);
     assert.ok(!this.element.hasClass(SPIN_CLASS), "spin classes aren't applied");
     $spinContainer = this.element.find("." + SPIN_CONTAINER_CLASS);
-    assert.ok(!$spinContainer.length, "spins aren't added");
 });
 
 QUnit.test("spin edit handling", function(assert) {
