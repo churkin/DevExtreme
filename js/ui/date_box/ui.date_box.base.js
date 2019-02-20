@@ -559,8 +559,8 @@ var DateBox = DropDownEditor.inherit({
         return this.callBase() && !this._isNativeType() || this._pickerType === PICKER_TYPE.rollers;
     },
 
-    _clearButtonVisibility: function() {
-        return this.callBase() && !this._isNativeType();
+    _isClearButtonVisible: function(name) {
+        return this.callBase(name) && !this._isNativeType();
     },
 
     _renderValue: function() {
