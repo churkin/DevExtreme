@@ -44,6 +44,21 @@ export default class ActionButtonCollection {
         return $container;
     }
 
+    clean() {
+        this.buttons.forEach(button => button.dispose());
+        this.buttons = [];
+    }
+
+    getButton(buttonName) {
+        const button = this.buttons.find(({ name }) => name === buttonName);
+
+        if(!button) {
+            throw "Cannot find button with this name";
+        }
+
+        return button.instance;
+    }
+
     renderAfterButtons(buttons) {
         return this._renderButtons(buttons, "after");
     }
@@ -58,15 +73,5 @@ export default class ActionButtonCollection {
                 button.update();
             }
         });
-    }
-
-    getButton(buttonName) {
-        const button = this.buttons.find(({ name }) => name === buttonName);
-
-        if(!button) {
-            throw "Cannot find button with this name";
-        }
-
-        return button.instance;
     }
 }

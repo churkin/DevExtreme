@@ -393,6 +393,10 @@ var TextEditorBase = Editor.inherit({
             .appendTo(this.$element());
     },
 
+    _clean() {
+        this._buttonCollection.clean();
+    },
+
     _createInput: function() {
         var $input = $("<input>");
         this._applyInputAttributes($input, this.option("inputAttr"));

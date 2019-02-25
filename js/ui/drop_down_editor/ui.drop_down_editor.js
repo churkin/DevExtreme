@@ -347,10 +347,12 @@ var DropDownEditor = TextBox.inherit({
         var fieldTemplate = this._getTemplateByOption("fieldTemplate");
 
         if(!(fieldTemplate && this.option("fieldTemplate"))) {
-            return;
+            return false;
         }
 
         this._renderTemplatedField(fieldTemplate, this._fieldRenderData());
+
+        return true;
     },
 
     _renderTemplatedField: function(fieldTemplate, data) {
@@ -382,9 +384,12 @@ var DropDownEditor = TextBox.inherit({
         return this.option("value");
     },
 
-    _renderInputValue: function() {
-        this.callBase.apply(this, arguments);
-        this._renderField();
+    _renderValue: function() {
+        const isFieldTemplateRendered = this._renderField();
+
+        if(!isFieldTemplateRendered) {
+            this.callBase.apply(this, arguments);
+        }
     },
 
     _initTemplates: function() {

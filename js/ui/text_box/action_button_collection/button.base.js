@@ -11,6 +11,10 @@ export default class ActionButtonBase {
         throw "Not implemented";
     }
 
+    dispose() {
+        this.instance.dispose ? this.instance.dispose() : this.instance.remove();
+    }
+
     render(instance) {
         this.instance = instance;
         this._onRendered(instance);
