@@ -911,8 +911,6 @@ var TagBox = SelectBox.inherit({
     },
 
     _renderTagsCore: function(items) {
-        this._renderInputAddons();
-
         this.option("selectedItems", this._selectedItems.slice());
         this._cleanTags();
 
