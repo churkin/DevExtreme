@@ -189,8 +189,8 @@ QUnit.test("correct buttons order after option change", function(assert) {
         $buttons = $buttonsContainer.children();
 
     assert.equal($buttons.length, 2, "clear button and drop button were rendered");
-    assert.ok($buttons.eq(1).hasClass(DROP_DOWN_EDITOR_BUTTON_CLASS), "drop button is the first one");
-    assert.ok($buttons.eq(0).hasClass("dx-clear-button-area"), "drop button is the second one");
+    assert.ok($buttons.eq(0).hasClass("dx-clear-button-area"), "clear button is the first one");
+    assert.ok($buttons.eq(1).hasClass(DROP_DOWN_EDITOR_BUTTON_CLASS), "drop button is the second one");
 });
 
 QUnit.test("Validation: onShown validation message handler should change", function(assert) {
