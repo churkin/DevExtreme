@@ -395,7 +395,6 @@ var TextEditorBase = Editor.inherit({
 
     _clean() {
         this._buttonCollection.clean();
-        this.callBase();
     },
 
     _createInput: function() {
@@ -750,7 +749,6 @@ var TextEditorBase = Editor.inherit({
                 this._renderStylingMode();
                 break;
             case "valueFormat":
-            case "buttons":
                 this._invalidate();
                 break;
             default:
