@@ -12,7 +12,7 @@ var $ = require("../../core/renderer"),
     eventUtils = require("../../events/utils"),
     pointerEvents = require("../../events/pointer"),
     ClearButton = require("./ui.text_editor.clear").default,
-    ActionButtonCollection = require("./action_button_collection").default,
+    ActionButtonCollection = require("./action_button_collection/index").default,
     config = require("../../core/config");
 
 var TEXTEDITOR_CLASS = "dx-texteditor",
@@ -734,7 +734,7 @@ var TextEditorBase = Editor.inherit({
                 this._renderPlaceholder();
                 break;
             case "showClearButton":
-                this._updateButtons(['clear']);
+                this._updateButtons(["clear"]);
                 break;
             case "text":
                 break;

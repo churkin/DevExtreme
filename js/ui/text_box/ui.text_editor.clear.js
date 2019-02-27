@@ -12,11 +12,11 @@ const TEXTEDITOR_ICON_CLASS = "dx-icon";
 const TEXTEDITOR_SHOW_CLEAR_BUTTON_CLASS = "dx-show-clear-button";
 
 export default class ClearButton extends ActionButtonBase {
-    constructor(editor) {
-        super("clear", editor);
+    constructor(editor, options) {
+        super("clear", editor, options);
     }
 
-    _onRendered($button) {
+    _onRendered(instance, $button) {
         const { editor } = this;
         const editorName = editor.NAME;
 
@@ -29,23 +29,37 @@ export default class ClearButton extends ActionButtonBase {
         );
     }
 
-    render($container) {
-        const $button = $("<span>")
+    _createInstance() {
+        const $element = $("<span>")
             .addClass(TEXTEDITOR_CLEAR_BUTTON_CLASS)
-            .append($("<span>").addClass(TEXTEDITOR_ICON_CLASS).addClass(TEXTEDITOR_CLEAR_ICON_CLASS))
-            .appendTo($container);
+            .append($("<span>").addClass(TEXTEDITOR_ICON_CLASS).addClass(TEXTEDITOR_CLEAR_ICON_CLASS));
 
-        return super.render($button);
+        return {
+            instance: $element,
+            $element
+        };
+    }
+
+    _isVisible() {
+        const { editor } = this;
+
+        return editor._isClearButtonVisible();
     }
 
     update() {
-        const editor = this.editor;
-        const $editor = editor.$element();
-        const isVisible = editor._isClearButtonVisible();
+        super.update();
 
-        this.instance && this.instance.toggleClass(STATE_INVISIBLE_CLASS, !isVisible);
+        const { editor, instance } = this;
+        const isRendered = !!instance;
 
-        // TODO: remove it
-        $editor.toggleClass(TEXTEDITOR_SHOW_CLEAR_BUTTON_CLASS, isVisible);
+        if(isRendered) {
+            const $editor = editor.$element();
+            const isVisible = this._isVisible();
+
+            instance && instance.toggleClass(STATE_INVISIBLE_CLASS, !isVisible);
+
+            // TODO: remove it
+            $editor.toggleClass(TEXTEDITOR_SHOW_CLEAR_BUTTON_CLASS, isVisible);
+        }
     }
 }

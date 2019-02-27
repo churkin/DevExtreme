@@ -1,29 +1,73 @@
+import $ from "../../../core/renderer";
+
 export default class ActionButtonBase {
-    constructor(name, editor, location = "after", options = {}) {
-        this.editor = editor;
+    constructor(name, editor, { location = "after" }) {
         this.instance = null;
+
+        this.$container = null;
+        this.$placeMarker = null;
+        this.editor = editor;
         this.location = location;
         this.name = name;
-        this.options = options;
     }
 
-    _onRendered(/* instance */) {
+    _addPlaceMarker($container) {
+        this.$placeMarker = $("<div>").appendTo($container);
+    }
+
+    _addToDOM($container, $element) {
+        this.$placeMarker ? this.$placeMarker.replaceWith($element) : $element.appendTo($container);
+    }
+
+    _createInstance(/* $container */) {
         throw "Not implemented";
+    }
+
+    _isRendered() {
+        return !!this.instance;
+    }
+
+    _isVisible() {
+        throw "Not implemented";
+    }
+
+    _onRendered(/* instance, $element */) {
+        throw "Not implemented";
+    }
+
+    _shouldRender() {
+        return this._isVisible() && !this._isRendered();
     }
 
     dispose() {
-        this.instance.dispose ? this.instance.dispose() : this.instance.remove();
+        const { instance, $placeMarker } = this;
+
+        if(instance) {
+            instance.dispose ? instance.dispose() : instance.remove();
+            this.instance = null;
+        }
+
+        $placeMarker && $placeMarker.remove();
     }
 
-    render(instance) {
-        this.instance = instance;
-        this._onRendered(instance);
-        this.update();
+    render($container = this.$container) {
+        this.$container = $container;
 
-        return instance;
+        if(this._isVisible()) {
+            const { instance, $element } = this._createInstance();
+
+            this.instance = instance;
+            this._addToDOM($container, $element);
+            this._onRendered(instance, $element);
+            this.update();
+        } else {
+            this._addPlaceMarker($container);
+        }
     }
 
     update() {
-        throw "Not implemented";
+        if(this._shouldRender()) {
+            this.render();
+        }
     }
 }

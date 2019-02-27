@@ -17,7 +17,7 @@ export default class ActionButtonCollection {
         }
 
         const { Ctor } = defaultButtonInfo;
-        const button = new Ctor(this.editor);
+        const button = new Ctor(this.editor, {});
 
         this.buttons.push(button);
 
@@ -25,11 +25,11 @@ export default class ActionButtonCollection {
     }
 
     _renderButtons(buttons, location) {
+        let $container = null;
+
         if(!buttons) {
             buttons = this.defaultButtonsInfo.map(({ name }) => name);
         }
-
-        let $container = buttons.length ? $("<div>").addClass(TEXTEDITOR_BUTTONS_CONTAINER_CLASS) : null;
 
         buttons.forEach(buttonName => {
             let button = this.buttons.find(({ name }) => name === buttonName);
@@ -37,6 +37,7 @@ export default class ActionButtonCollection {
             button = button || this._createButton(buttonName);
 
             if(button.location === location) {
+                $container = $container || $("<div>").addClass(TEXTEDITOR_BUTTONS_CONTAINER_CLASS);
                 button.render($container);
             }
         });

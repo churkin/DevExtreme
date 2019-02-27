@@ -7,25 +7,24 @@ const DROP_DOWN_EDITOR_BUTTON_CLASS = "dx-dropdowneditor-button";
 const DROP_DOWN_EDITOR_BUTTON_VISIBLE = "dx-dropdowneditor-button-visible";
 
 export default class ClearButton extends ActionButtonBase {
-    constructor(editor) {
-        super("dropDown", editor);
+    constructor(editor, options) {
+        super("dropDown", editor, options);
     }
 
-    _onRendered(button) {
+    _onRendered(instance) {
         const { editor } = this;
 
         if(editor.option("showDropDownButton") && !editor.option("openOnFieldClick")) {
-            button.option("onClick", (e) => editor._openHandler(e));
+            instance.option("onClick", (e) => editor._openHandler(e));
         }
 
-        eventsEngine.on(button.$element(), "mousedown", (e) => e.preventDefault());
+        eventsEngine.on(instance.$element(), "mousedown", (e) => e.preventDefault());
     }
 
-    render($container) {
+    _createInstance() {
         const { editor } = this;
         const $button = $("<div>")
-            .addClass(DROP_DOWN_EDITOR_BUTTON_CLASS)
-            .prependTo($container);
+            .addClass(DROP_DOWN_EDITOR_BUTTON_CLASS);
 
         const instance = editor._createComponent($button, Button, {
             focusStateEnabled: false,
@@ -37,20 +36,35 @@ export default class ClearButton extends ActionButtonBase {
 
         $button.removeClass("dx-button");
 
-        return super.render(instance);
+        return {
+            $element: $button,
+            instance
+        };
+    }
+
+    _isVisible() {
+        const { editor } = this;
+
+        return editor.option("showDropDownButton");
     }
 
     update() {
-        const { editor } = this;
-        const $editor = editor.$element();
-        const isVisible = editor.option("showDropDownButton");
-        const isReadOnly = editor.option("readOnly");
+        super.update();
 
-        this.instance.option("visible", isVisible);
-        this.instance.option("disabled", isReadOnly);
-        this.instance.option("template", editor._getTemplateByOption("dropDownButtonTemplate"));
+        const { editor, instance } = this;
+        const isRendered = !!instance;
 
-        // TODO: remove it
-        $editor.toggleClass(DROP_DOWN_EDITOR_BUTTON_VISIBLE, isVisible);
+        if(isRendered) {
+            const $editor = editor.$element();
+            const isVisible = this._isVisible();
+            const isReadOnly = editor.option("readOnly");
+
+            instance.option("visible", isVisible);
+            instance.option("disabled", isReadOnly);
+            instance.option("template", editor._getTemplateByOption("dropDownButtonTemplate"));
+
+            // TODO: remove it
+            $editor.toggleClass(DROP_DOWN_EDITOR_BUTTON_VISIBLE, isVisible);
+        }
     }
 }
