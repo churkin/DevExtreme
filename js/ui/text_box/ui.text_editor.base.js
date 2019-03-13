@@ -781,7 +781,9 @@ var TextEditorBase = Editor.inherit({
                 break;
             case "valueFormat":
             case "buttons": {
-                checkButtonsOptionType(args.value);
+                if(args.fullName === args.name) {
+                    checkButtonsOptionType(args.value);
+                }
 
                 this._invalidate();
                 break;
