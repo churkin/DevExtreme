@@ -12,6 +12,9 @@ const JS_VENDORS = [
         path: '/angular/angular.js'
     },
     {
+        path: '/preact/dist/preact.js'
+    },
+    {
         path: '/jquery/dist/jquery.js'
     },
     {

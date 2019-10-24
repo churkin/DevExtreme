@@ -1,85 +1,93 @@
-var $ = require("jquery"),
-    support = require("core/utils/support");
+import LoadIndicator from 'ui/load_indicator';
+import renderView from 'ui/widget/render_view';
+import support from 'core/utils/support';
 
-require("common.css!");
-require("ui/load_indicator");
+const view = LoadIndicator._view;
+let el = null;
 
-QUnit.testStart(function() {
-    var markup =
-        '<div id="loadIndicator"></div>';
+const render = (data = {}) => {
+    const defaultData = {
+        useAnimation: true,
+        animatingSegmentInner: false,
+        animatingSegmentCount: 1,
+        indicatorSrc: '',
+        width: undefined,
+        height: undefined
+    };
 
-    $("#qunit-fixture").html(markup);
-});
-
-var LOADINDICATOR_CLASS = "dx-loadindicator",
-    LOADINDICATOR_WRAPPER = LOADINDICATOR_CLASS + "-wrapper",
-    LOADINDICATOR_ICON = LOADINDICATOR_CLASS + "-icon",
-    LOADINDICATOR_CONTENT_CLASS = "dx-loadindicator-content",
-    LOADINDICATOR_SEGMENT = LOADINDICATOR_CLASS + "-segment",
-    LOADINDICATOR_IMAGE = "dx-loadindicator-image";
-
-var isIdenticalNamesInUrl = function(firstUrl, secondUrl) {
-    var firstName = firstUrl.split("/");
-    firstName = firstName[firstName.length - 1].replace(")", "").replace("\"", "");
-    var secondName = secondUrl.split("/");
-    secondName = secondName[secondName.length - 1];
-    return firstName === secondName;
+    renderView(view, el, Object.assign(defaultData, data));
 };
 
-QUnit.module("LoadIndicator markup");
-
-QUnit.test("Basic markup initialization", function(assert) {
-    var $indicator = $("#loadIndicator").dxLoadIndicator(),
-        $indicatorWrapper = $indicator.find("." + LOADINDICATOR_WRAPPER),
-        $indicatorContent = $indicator.find("." + LOADINDICATOR_CONTENT_CLASS);
-
-    assert.ok($indicator.hasClass(LOADINDICATOR_CLASS), "Load Indicator initialized");
-    assert.equal($indicatorWrapper.length, 1, "Wrapper has been added");
-    assert.equal($indicatorContent.length, 1, "Content is added");
+QUnit.testStart(() => {
+    document.getElementById('qunit-fixture').innerHTML = '<div id="loadIndicator"></div>';
+    el = document.getElementById('loadIndicator');
 });
 
-QUnit.test("LoadIndicator width custom dimensions", function(assert) {
-    var $indicator = $("#loadIndicator").dxLoadIndicator({ width: 75, height: 75 }),
-        indicatorElement = $indicator.get(0);
+QUnit.module('LoadIndicator markup');
 
-    assert.strictEqual(indicatorElement.style.width, "75px", "outer width of the element must be equal to custom width");
-    assert.strictEqual(indicatorElement.style.height, "75px", "outer height of the element must be equal to custom width");
+QUnit.test('basic markup initialization', assert => {
+    render();
+
+    const indicatorWrapper = el.querySelector('.dx-loadindicator-wrapper');
+    const indicatorContent = el.querySelector('.dx-loadindicator-content');
+
+    assert.ok(el.className.indexOf('dx-loadindicator') !== -1);
+    assert.ok(indicatorWrapper);
+    assert.ok(indicatorContent);
 });
 
+QUnit.test('LoadIndicator width custom dimensions', assert => {
+    render({ width: 75, height: 75 });
 
-QUnit.module("Static load indicator", {
+    const indicatorWrapper = el.querySelector('.dx-loadindicator-wrapper');
+
+    assert.strictEqual(indicatorWrapper.style.width, '75px');
+    assert.strictEqual(indicatorWrapper.style.height, '75px');
+    assert.strictEqual(indicatorWrapper.style.fontSize, '75px');
+});
+
+QUnit.test('render animated indicator markup', function(assert) {
+    render({ animatingSegmentCount: 10 });
+    assert.ok(el.querySelector('.dx-loadindicator-icon'));
+    assert.ok(el.querySelector('.dx-loadindicator-segment1'));
+    assert.ok(el.querySelector('.dx-loadindicator-content'));
+    assert.strictEqual(el.querySelectorAll('.dx-loadindicator-segment').length, 11);
+});
+
+QUnit.module('Static load indicator', {
     beforeEach: function() {
-        // Override support styleProp
         this._defaultAnimation = support.animation;
-        support.animation = function() { return false; };
+        support.animation = () => false;
     },
     afterEach: function() {
-        // Restoring support styleProp
         support.animation = this._defaultAnimation;
     }
 });
 
-QUnit.test("basic render", function(assert) {
-    var $indicator = $("#loadIndicator").dxLoadIndicator({ visible: false, viaImage: false }),
-        $indicatorWrapper = $indicator.find("." + LOADINDICATOR_WRAPPER);
+QUnit.test('basic render', assert => {
+    render();
 
-    assert.ok($indicatorWrapper.hasClass(LOADINDICATOR_IMAGE), "Image class added");
-    assert.equal($indicator.find("." + LOADINDICATOR_ICON).length, 0, "Icon div not created");
-    assert.equal($indicator.find("." + LOADINDICATOR_SEGMENT).length, 0, "16 Segment not created");
-    assert.equal($indicator.find("." + LOADINDICATOR_SEGMENT + "1").length, 0, "Numerated segment not created");
+    const indicatorWrapper = el.querySelector('.dx-loadindicator-wrapper');
+
+    assert.ok(indicatorWrapper.className.indexOf('dx-loadindicator-image') !== -1);
+    assert.notOk(el.querySelector('.dx-loadindicator-icon'));
+    assert.notOk(el.querySelector('.dx-loadindicator-segment'));
+    assert.notOk(el.querySelector('.dx-loadindicator-segment1'));
+    assert.strictEqual(indicatorWrapper.style.backgroundImage, '');
 });
 
-QUnit.test("custom indicator", function(assert) {
-    var url = "../../testing/content/customLoadIndicator.png",
-        $element = $("#loadIndicator").dxLoadIndicator({
-            visible: true,
-            indicatorSrc: url
-        }),
-        $wrapper = $element.find("." + LOADINDICATOR_WRAPPER),
-        instance = $("#loadIndicator").dxLoadIndicator("instance"),
-        getBackgroundImage = function() { return $wrapper[0].style.backgroundImage; };
+QUnit.test('custom indicator', assert => {
+    const getBackgroundImage = () => el.querySelector('.dx-loadindicator-wrapper').style.backgroundImage;
+    const isIdenticalUrl = (firstUrl, secondUrl) => {
+        let firstName = firstUrl.split('/');
+        let secondName = secondUrl.split('/');
 
-    assert.ok(isIdenticalNamesInUrl(getBackgroundImage(), url), "custom indicator installed successfully as image");
-    instance.option("indicatorSrc", "");
-    assert.ok(getBackgroundImage() !== "", "custom indicator changed successfully as image");
+        firstName = firstName[firstName.length - 1].replace(')', '').replace('"', '');
+        secondName = secondName[secondName.length - 1];
+
+        return firstName === secondName;
+    };
+
+    render({ indicatorSrc: '../../testing/content/customLoadIndicator.png' });
+    assert.ok(isIdenticalUrl(getBackgroundImage(), '../../testing/content/customLoadIndicator.png'));
 });

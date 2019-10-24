@@ -13,7 +13,8 @@ var $ = require("../../core/renderer"),
     eventUtils = require("../../events/utils"),
     hoverEvents = require("../../events/hover"),
     feedbackEvents = require("../../events/core/emitter.feedback"),
-    clickEvent = require("../../events/click");
+    clickEvent = require("../../events/click"),
+    renderView = require("./render_view").default;
 
 var UI_FEEDBACK = "UIFeedback",
     WIDGET_CLASS = "dx-widget",
@@ -46,6 +47,11 @@ var UI_FEEDBACK = "UIFeedback",
 * @hidden
 */
 var Widget = DOMComponentWithTemplate.inherit({
+    _renderContentImpl: function() {
+        const view = this.constructor._view;
+
+        renderView(view, this.$element().get(0), this._getViewData());
+    },
 
     _supportedKeys: function() {
         return {};
@@ -270,19 +276,15 @@ var Widget = DOMComponentWithTemplate.inherit({
 
     _renderContent: function() {
         commonUtils.deferRender(() => {
-            if(this._disposed) {
-                return;
+            if(!this._disposed) {
+                return this._renderContentImpl();
             }
-            return this._renderContentImpl();
         }).done(() => {
-            if(this._disposed) {
-                return;
+            if(!this._disposed) {
+                return this._fireContentReadyAction();
             }
-            this._fireContentReadyAction();
         });
     },
-
-    _renderContentImpl: commonUtils.noop,
 
     _fireContentReadyAction: commonUtils.deferRenderer(function() {
         this._contentReadyAction();
