@@ -25,6 +25,9 @@ export const EVENT = {
   inactive: 'dxinactive',
   shown: 'dxshown',
   resize: 'dxresize',
+  dragStart: 'dxdragstart',
+  drag: 'dxdrag',
+  dragEnd: 'dxdragend',
 };
 
 export const defaultEvent = {
@@ -89,16 +92,21 @@ jest.mock('../../events/core/events_engine', () => {
         if (!eventHandlers[event]) {
           eventHandlers[event] = [];
         }
-
         eventHandlers[event].push({
-          handler: args[args.length - 1],
+          handler: args[0],
           el,
         });
       },
 
       off: (_, eventName): void => {
-        const event = eventName.split('.')[0];
-        eventHandlers[event] = [];
+        if (!eventName) {
+          Object.keys(eventHandlers).forEach((event) => {
+            eventHandlers[event] = eventHandlers[event]?.filter(({ el }) => el !== _);
+          });
+        } else {
+          const event = eventName.split('.')[0];
+          eventHandlers[event] = [];
+        }
       },
 
       trigger: (element, event): void => {

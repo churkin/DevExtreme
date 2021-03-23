@@ -1,9 +1,103 @@
 import domAdapter from '../../core/dom_adapter';
 import $ from '../../core/renderer';
-import { isDefined, isRenderer, isWindow } from './type';
+import { isDefined, isRenderer, isWindow, isNumeric } from './type';
+import { getSize, getElementBoxParams } from './size';
 import { getWindow } from './window';
 
 const window = getWindow();
+
+export const getWidth = (el) => elementSize(el, 'width');
+export const setWidth = (el, value) => elementSize(el, 'width', value);
+export const getHeight = (el) => elementSize(el, 'height');
+export const setHeight = (el, value) => elementSize(el, 'height', value);
+export const getOuterWidth = (el) => elementSize(el, 'outerWidth');
+export const setOuterWidth = (el, value) => elementSize(el, 'outerWidth', value);
+export const getOuterHeight = (el) => elementSize(el, 'outerHeight');
+export const setOuterHeight = (el, value) => elementSize(el, 'outerHeight', value);
+export const getInnerWidth = (el) => elementSize(el, 'innerWidth');
+export const setInnerWidth = (el, value) => elementSize(el, 'innerWidth', value);
+export const getInnerHeight = (el) => elementSize(el, 'innerHeight');
+export const setInnerHeight = (el, value) => elementSize(el, 'innerHeight', value);
+
+export const elementSize = function(el, sizeProperty, value) {
+    const partialName = sizeProperty.toLowerCase().indexOf('width') >= 0 ? 'Width' : 'Height';
+    const propName = partialName.toLowerCase();
+    const isOuter = sizeProperty.indexOf('outer') === 0;
+    const isInner = sizeProperty.indexOf('inner') === 0;
+
+    if(isWindow(el)) {
+        return isOuter ? el['inner' + partialName] : domAdapter.getDocumentElement()['client' + partialName];
+    }
+
+    if(domAdapter.isDocument(el)) {
+        const documentElement = domAdapter.getDocumentElement();
+        const body = domAdapter.getBody();
+
+        return Math.max(
+            body['scroll' + partialName],
+            body['offset' + partialName],
+            documentElement['scroll' + partialName],
+            documentElement['offset' + partialName],
+            documentElement['client' + partialName]
+        );
+    }
+
+    if(arguments.length === 2 || typeof value === 'boolean') {
+        const include = {
+            paddings: isInner || isOuter,
+            borders: isOuter,
+            margins: value
+        };
+
+        return getSize(el, propName, include);
+    }
+
+    if(value === undefined || value === null) {
+        return null;
+    }
+
+    if(isNumeric(value)) {
+        const elementStyles = window.getComputedStyle(el);
+        const sizeAdjustment = getElementBoxParams(propName, elementStyles);
+        const isBorderBox = elementStyles.boxSizing === 'border-box';
+        value = Number(value);
+
+        if(isOuter) {
+            value -= isBorderBox ? 0 : (sizeAdjustment.border + sizeAdjustment.padding);
+        } else if(isInner) {
+            value += isBorderBox ? sizeAdjustment.border : -sizeAdjustment.padding;
+        } else if(isBorderBox) {
+            value += sizeAdjustment.border + sizeAdjustment.padding;
+        }
+    }
+    value += isNumeric(value) ? 'px' : '';
+
+    domAdapter.setStyle(el, propName, value);
+
+    return null;
+};
+
+export const getWindowByElement = (el) => {
+    return isWindow(el) ? el : el.defaultView;
+};
+
+export const getOffset = (el) => {
+    if(el.getClientRects().length) {
+        return {
+            top: 0,
+            left: 0
+        };
+    }
+
+    const rect = el.getBoundingClientRect();
+    const win = getWindowByElement(el.ownerDocument);
+    const docElem = el.ownerDocument.documentElement;
+
+    return {
+        top: rect.top + win.pageYOffset - docElem.clientTop,
+        left: rect.left + win.pageXOffset - docElem.clientLeft
+    };
+};
 
 export const resetActiveElement = function() {
     const activeElement = domAdapter.getActiveElement();

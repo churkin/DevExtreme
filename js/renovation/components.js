@@ -9,5 +9,7 @@ module.exports = [
     // { name: 'Scrollable', pathInRenovationFolder: 'ui/scroll_view/scrollable.j', pathInJSFolder: 'ui/scroll_view/ui.scrollable.js' },
     // { name: 'DataGrid', pathInRenovationFolder: 'ui/grids/data_grid/data_grid.j', pathInJSFolder: 'ui/data_grid.js' },
     { name: 'Pager', pathInRenovationFolder: 'ui/pager/pager.j', pathInJSFolder: 'ui/pager.js', pathToWrapper: '../../../testing/helpers/renovationPagerHelper.js' },
+    { name: 'Resizable', pathInRenovationFolder: 'ui/resizable/resizable.j', pathInJSFolder: 'ui/resizable.js' },
+    { name: 'ResizableContainer', pathInRenovationFolder: 'ui/resizable/container.j', pathInJSFolder: 'ui/resizable.container.js' },
     // { name: 'Bullet', pathInRenovationFolder: 'viz/sparklines/bullet.j', pathInJSFolder: 'viz/sparklines/bullet.js' },
 ];

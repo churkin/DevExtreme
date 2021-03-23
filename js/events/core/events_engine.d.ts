@@ -1,5 +1,5 @@
 type EventsEngineType = {
-    on: (element, eventName, handler) => void;
+    on: (element, eventName, handler, options?) => void;
     off: (element, eventName, handler) => void;
     set: (eventEngine) => void;
 };

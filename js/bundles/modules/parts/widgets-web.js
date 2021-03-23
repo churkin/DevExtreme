@@ -20,4 +20,5 @@ ui.dxFilterBuilder = require('../../../ui/filter_builder');
 ui.dxFileManager = require('../../../ui/file_manager');
 ui.dxDiagram = require('../../../ui/diagram');
 ui.dxGantt = require('../../../ui/gantt');
+ui.dxResizableContainer = require('../../../ui/resizable.container');
 /// BUNDLER_PARTS_END
