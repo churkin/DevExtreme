@@ -40,8 +40,6 @@ export class ScrollableProps {
 
   @Event() onReachBottom?: EventCallback<unknown>;
 
-  @OneWay() useSimulatedScrollbar?: boolean;
-
   @OneWay() pullingDownText?: string;
 
   @OneWay() pulledDownText?: string;

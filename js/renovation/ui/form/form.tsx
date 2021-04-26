@@ -12,7 +12,6 @@ import { Scrollable } from '../scroll_view/scrollable';
 export const viewFunction = (viewModel: Form): JSX.Element => {
   const aria = { role: 'form' };
   const cssClasses = combineClasses({ 'dx-form': true });
-
   const {
     props: {
       scrollingEnabled,
