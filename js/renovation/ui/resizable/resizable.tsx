@@ -10,7 +10,7 @@ import {
   RefObject,
 } from '@devextreme-generator/declarations';
 import type {
-  Area, AreaObject, MovingSides, AreaProp, ResizeActionArgs, Handle,
+  Area, AreaObject, MovingSides, AreaProp, ResizeActionArgs, Handle, DragEvent,
 } from './common/types.d';
 import { fitIntoRange } from '../../../core/utils/math';
 import {
@@ -34,7 +34,7 @@ export const viewFunction = (viewModel: Resizable): JSX.Element => {
   } = viewModel;
 
   // eslint-disable-next-line react/prop-types
-  const { children } = props;
+  const { children, disabled, rtlEnabled } = props;
 
   return (
 
@@ -46,6 +46,8 @@ export const viewFunction = (viewModel: Resizable): JSX.Element => {
       {...restAttributes}
       width={size.width}
       height={size.height}
+      disabled={disabled}
+      rtlEnabled={rtlEnabled}
       onResizeStart={onDragStart}
       onResize={onDrag}
       onResizeEnd={onDragEnd}
@@ -107,11 +109,6 @@ export class Resizable extends JSXComponent(ResizableProps) {
   private elementSize: { width: number; height: number } = { width: 0, height: 0 };
 
   public onDragStart(event: Event): undefined {
-    // TODO: Implement
-    // if ($element.is('.dx-state-disabled, .dx-state-disabled *')) {
-    //   e.cancel = true;
-    //   return;
-    // }
     const { onResizeStart } = this.props;
     const mainEl = this.mainRef.current;
     const { target } = event;
@@ -129,7 +126,7 @@ export class Resizable extends JSXComponent(ResizableProps) {
     if (area) {
       extend(event, getDragOffsets(
         area,
-        /* handleEl */ target as HTMLElement,
+        target as HTMLElement,
         this.props.area,
       ));
     }
@@ -144,14 +141,14 @@ export class Resizable extends JSXComponent(ResizableProps) {
     return undefined;
   }
 
-  public onDrag(event: Event): undefined {
+  public onDrag(event: DragEvent): undefined {
     const sides = this.movingSides;
     const location = this.elementLocation;
     const size = this.elementSize;
     const { onResize } = this.props;
     const mainEl = this.mainRef.current;
     const { target } = event;
-    const offset = getOffsets((event as any).offset, target as HTMLElement);
+    const offset = getOffsets(event.offset, target as HTMLElement);
     const width = size.width + offset.x * (sides.left ? -1 : 1);
     const height = size.height + offset.y * (sides.top ? -1 : 1);
 

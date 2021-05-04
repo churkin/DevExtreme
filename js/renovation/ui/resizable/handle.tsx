@@ -11,7 +11,9 @@ import { EffectReturn } from '../../utils/effect_return';
 import { start as dragEventStart, move as dragEventMove, end as dragEventEnd } from '../../../events/drag';
 import { addNamespace } from '../../../events/utils/index';
 import eventsEngine from '../../../events/core/events_engine';
-import type { Handle, Corner } from './common/types.d';
+import type {
+  Handle, Corner, DragStartEvent, DragEvent,
+} from './common/types.d';
 
 const namespace = 'dxResizable';
 const dragStartEvent = addNamespace(dragEventStart, namespace);
@@ -34,9 +36,9 @@ export class ResizableHandleProps {
 
   @OneWay() disabled = false;
 
-  @OneWay() onResizeStart?: (e: Event) => void;
+  @OneWay() onResizeStart?: (e: DragStartEvent) => void;
 
-  @OneWay() onResize?: (e: Event) => void;
+  @OneWay() onResize?: (e: DragEvent) => void;
 
   @OneWay() onResizeEnd?: (e: Event) => void;
 }
@@ -59,10 +61,14 @@ export class ResizableHandle extends JSXComponent(ResizableHandleProps) {
       const handleEl = this.mainRef.current;
       const opts = { direction: 'both', immediate: true };
 
-      eventsEngine.on(handleEl, dragStartEvent, (event) => {
-        eventsEngine.on(handleEl, dragEvent, onResize, opts);
-        eventsEngine.on(handleEl, dragEndEvent, onResizeEnd, opts);
-        onResizeStart?.(event);
+      eventsEngine.on(handleEl, {
+        [dragStartEvent]: (event) => {
+          eventsEngine.on(handleEl, {
+            [dragEvent]: onResize,
+            [dragEndEvent]: onResizeEnd,
+          }, opts);
+          onResizeStart?.(event);
+        },
       }, opts);
 
       return (): void => eventsEngine.off(handleEl, undefined, undefined);

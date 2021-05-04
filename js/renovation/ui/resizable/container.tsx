@@ -3,15 +3,20 @@ import {
   ComponentBindings,
   JSXComponent,
   OneWay,
+  Ref,
+  Effect,
   ForwardRef,
   Slot,
   RefObject,
   InternalState,
 } from '@devextreme-generator/declarations';
-import type { Handle, Corner } from './common/types.d';
+import type {
+  Handle, Corner, DragStartEvent, DragEvent,
+} from './common/types.d';
 import { ResizableHandle } from './handle';
 import { combineClasses } from '../../utils/combine_classes';
 import { triggerResizeEvent } from '../../../events/visibility_change';
+import { EffectReturn } from '../../utils/effect_return';
 
 const getCssClasses = (
   disabled: boolean,
@@ -26,12 +31,12 @@ const getCssClasses = (
 
 export const viewFunction = (viewModel: ResizableContainer): JSX.Element => {
   const {
-    handles, styles, props, cssClasses, restAttributes,
+    handles, styles, props, cssClasses, restAttributes, mainRef,
     onHandleResizeStart, onHandleResize, onHandleResizeEnd,
   } = viewModel;
 
   // eslint-disable-next-line react/prop-types
-  const { children, disabled, mainRef } = props;
+  const { children, disabled } = props;
   // TODO: generator's bug, remove after fix
   restAttributes && delete restAttributes.className;
 
@@ -60,7 +65,7 @@ export class ResizableContainerProps {
 
   @OneWay() onResizeStart?: (e: Event) => void;
 
-  @OneWay() onResize?: (e: Event) => void;
+  @OneWay() onResize?: (e: DragEvent) => void;
 
   @OneWay() onResizeEnd?: (e: Event) => void;
 
@@ -87,18 +92,30 @@ export class ResizableContainerProps {
 export class ResizableContainer extends JSXComponent(ResizableContainerProps) {
   @InternalState() isResizing = false;
 
-  public onHandleResizeStart(event: Event): undefined {
+  @Ref() mainRef!: RefObject<HTMLDivElement>;
+
+  @Effect({ run: 'once' })
+  forwardRefInitEffect(): EffectReturn {
+    this.props.mainRef.current = this.mainRef.current;
+  }
+
+  public onHandleResizeStart(event: DragStartEvent): undefined {
+    // TODO: Implement
+    // if ($element.is('.dx-state-disabled, .dx-state-disabled *')) {
+    //   e.cancel = true;
+    //   return;
+    // }
     this.isResizing = true;
     this.props.onResizeStart?.(event);
     // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-explicit-any
-    (event as any).targetElements = null;
+    event.targetElements = null;
     return undefined;
   }
 
-  public onHandleResize(event: Event): undefined {
-    const { onResize, mainRef } = this.props;
+  public onHandleResize(event: DragEvent): undefined {
+    const { onResize } = this.props;
     onResize?.(event);
-    triggerResizeEvent(mainRef.current);
+    triggerResizeEvent(this.mainRef.current);
     return undefined;
   }
 

@@ -87,25 +87,39 @@ jest.mock('../../events/core/events_engine', () => {
       ...originalEventsEngine,
 
       on: (el, eventName, ...args): void => {
-        const event = eventName.split('.')[0];
+        if (typeof eventName === 'string') {
+          const event = eventName.split('.')[0];
 
-        if (!eventHandlers[event]) {
-          eventHandlers[event] = [];
+          if (!eventHandlers[event]) {
+            eventHandlers[event] = [];
+          }
+          eventHandlers[event].push({
+            handler: args[args.length - 1],
+            el,
+          });
+        } else {
+          Object.keys(eventName).forEach((event) => {
+            const name = event.split('.')[0];
+
+            if (!eventHandlers[name]) {
+              eventHandlers[name] = [];
+            }
+            eventHandlers[name].push({
+              handler: eventName[event],
+              el,
+            });
+          });
         }
-        eventHandlers[event].push({
-          handler: args[0],
-          el,
-        });
       },
 
       off: (_, eventName): void => {
-        if (!eventName) {
+        if (typeof eventName === 'string') {
+          const event = eventName.split('.')[0];
+          eventHandlers[event] = [];
+        } else {
           Object.keys(eventHandlers).forEach((event) => {
             eventHandlers[event] = eventHandlers[event]?.filter(({ el }) => el !== _);
           });
-        } else {
-          const event = eventName.split('.')[0];
-          eventHandlers[event] = [];
         }
       },
 

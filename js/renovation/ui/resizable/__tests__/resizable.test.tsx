@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { createRef } from 'react';
 import { shallow } from 'enzyme';
 import { Resizable, viewFunction } from '../resizable';
-import { getAreaFromObject, getAreaFromElement } from '../utils';
+// import { ResizableContainer } from '../container';
 
 jest.mock('../utils', () => ({
   getAreaFromObject: jest.fn(() => 'getAreaFromObject util result'),
@@ -11,48 +11,69 @@ jest.mock('../utils', () => ({
 
 describe('Resizable', () => {
   describe('View', () => {
-    it('should render children', () => {
+    it('should pass restAttributes to the resizable container', () => {
       const resizable = shallow(viewFunction({
-        handles: [],
-        props: { children: <div id="child" /> },
-      } as any) as any);
-      expect(resizable.find('#child').exists()).toBe(true);
-    });
-
-    it('should spread restAttributes', () => {
-      const resizable = shallow(viewFunction({
+        size: {},
         props: {},
-        handles: [],
         restAttributes: { 'custom-attribute': 'customAttribute' },
-      } as any) as any);
-      expect(resizable.prop('custom-attribute')).toBe('customAttribute');
+      } as any));
+      const container = resizable.children().at(0);
+
+      expect(container.props()).toMatchObject({ 'custom-attribute': 'customAttribute' });
     });
 
-    it('should render handles', () => {
+    it('should pass size to the resizable container', () => {
       const resizable = shallow(viewFunction({
-        handles: ['handle1', 'handle2', 'handle3'],
+        size: { width: 10, height: 20 },
         props: {},
-      } as any) as any);
-      const children = resizable.find('div').children();
-      expect(children.length).toBe(3);
-      expect(children.at(0).is('div.dx-resizable-handle.dx-resizable-handle-handle1')).toBe(true);
-      expect(children.at(1).is('div.dx-resizable-handle.dx-resizable-handle-handle2')).toBe(true);
-      expect(children.at(2).is('div.dx-resizable-handle.dx-resizable-handle-handle3')).toBe(true);
+      } as any));
+      const container = resizable.children().at(0);
+
+      expect(container.props()).toMatchObject({ width: 10, height: 20 });
     });
 
-    // NOTE: add mainRef test
-    it('should render main element "style" and "className"', () => {
+    it('should pass styles to the resizable container', () => {
       const resizable = shallow(viewFunction({
+        size: {},
+        styles: 'styles',
         props: {},
-        handles: [],
-        styles: { width: 10, height: 10 },
-        cssClasses: 'resizable-cusom-class1 resizable-cusom-class2',
-        children: null,
-      } as any) as any);
-      const mainEl = resizable.find('div');
+      } as any));
+      const container = resizable.children().at(0);
 
-      expect(mainEl.is('.resizable-cusom-class1.resizable-cusom-class2')).toBe(true);
-      expect(mainEl.prop('style')).toEqual({ width: 10, height: 10 });
+      expect(container.props()).toMatchObject({ style: 'styles' });
+    });
+
+    it('should pass handles to the resizable container', () => {
+      const resizable = shallow(viewFunction({
+        size: {},
+        handles: ['top', 'left'],
+        props: {},
+      } as any));
+      const container = resizable.children().at(0);
+
+      expect(container.props()).toMatchObject({ handles: ['top', 'left'] });
+    });
+
+    it('should pass mainRef to the resizable container', () => {
+      const mainRef = {};
+      const resizable = shallow(viewFunction({
+        size: {},
+        props: {},
+        mainRef,
+      } as any));
+      const container = resizable.children().at(0);
+
+      expect(container.props().mainRef).toBe(mainRef);
+    });
+
+    it('should pass all necessary properties to the resizable container', () => {
+      const resizable = shallow(viewFunction({
+        size: {},
+        props: { disabled: true, rtlEnabled: true, children: 'children' },
+      } as any));
+      const container = resizable.children().at(0);
+
+      expect(container.props()).toMatchObject({ disabled: true, rtlEnabled: true, children: 'children' });
     });
   });
 
@@ -64,20 +85,26 @@ describe('Resizable', () => {
 
     describe('Events', () => {
       describe('onResizeStart', () => {
-      });
+        // it('should be raised by handle event', () => {
+        //   const onResizeStart = jest.mock();
+        //   const resizable = shallow(viewFunction({
+        //     size: {},
+        //     props: { onResizeStart },
+        //   } as any));
+        //   const container = resizable.children().at(0);
+        //   const handler = container.props().onResizeStart;
 
-      describe('onResize', () => {
-      });
+        //   handler(defaultEvent);
 
-      describe('onResizeEnd', () => {
-      });
-    });
-  });
-
-  describe('Logic', () => {
-    describe('Getters', () => {
-      describe('area', () => {
-        it('area-function should have component context', () => {
+        //   expect(onResizeStart).toBeCalledTimes(1);
+        //   expect(onResizeStart).toBeCalledWith({
+        //     event: defaultEvent,
+        //     width: ,
+        //     height: ,
+        //     handles: ,
+        //   });
+        // });
+        /* it('area-function should have component context', () => {
           const area = {
             left: 1, top: 2, right: 3, bottom: 4,
           };
@@ -106,17 +133,25 @@ describe('Resizable', () => {
           expect(resizable.area).toEqual('getAreaFromElement util result');
           expect(getAreaFromElement).toHaveBeenCalledTimes(1);
           expect(getAreaFromElement).lastCalledWith(Math, null);
-        });
+        }); */
       });
 
-      describe('cssClasses', () => {
-        it('should add "disabled" and "rtlEnabled" classes', () => {
-          let resizable = new Resizable({});
-          expect(resizable.cssClasses).toEqual('dx-resizable');
+      describe('onResize', () => {
+      });
 
-          resizable = new Resizable({ rtlEnabled: true, disabled: true });
-          expect(resizable.cssClasses).toEqual('dx-resizable dx-state-disabled dx-rtl');
-        });
+      describe('onResizeEnd', () => {
+      });
+    });
+  });
+
+  describe('Logic', () => {
+    describe('Getters', () => {
+      describe('styles', () => {
+        // it('should exclude width/height from the style attribute', () => {
+        //   const resizable = new Resizable({ style: { width: 40, height: 50,
+        // backgroundColor: 'Red' } });
+        //   expect(resizable.styles).toEqual({ backgroundColor: 'Red' });
+        // });
       });
 
       describe('size', () => {

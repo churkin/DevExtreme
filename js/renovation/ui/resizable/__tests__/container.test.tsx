@@ -87,6 +87,7 @@ describe('ResizableContainer', () => {
           } as any);
           const event = { dragEvent: true };
 
+          container.mainRef = { current: mainEl } as any;
           container.onHandleResize(event as any);
 
           expect(onResize).toHaveBeenCalledTimes(1);
