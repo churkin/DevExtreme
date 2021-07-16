@@ -53,6 +53,7 @@ import {
   ScrollEventArgs,
   ScrollableDirection,
   DxMouseEvent,
+  DxMouseWheelEvent,
   DxKeyboardEvent,
 } from './types.d';
 
@@ -78,6 +79,7 @@ import { getScrollLeftMax } from './utils/get_scroll_left_max';
 import { inRange } from '../../../core/utils/math';
 import { isVisible } from './utils/is_element_visible';
 import { getElementPaddingBottom } from './utils/get_element_padding';
+import { Scrollbar } from './scrollbar';
 
 const DEFAULT_OFFSET = { top: 0, left: 0 };
 
@@ -332,7 +334,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
   @Method()
   release(): void {
     this.updateSizes();
-    this.eventHandler((scrollbar): void => scrollbar.releaseHandler() as undefined);
+    this.eventHandler((scrollbar: Scrollbar): void => scrollbar.releaseHandler());
   }
 
   @Method()
@@ -362,9 +364,9 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     this.prepareDirections(true);
     this.onStart();
     this.eventHandler(
-      (scrollbar): void => scrollbar.scrollByHandler(
+      (scrollbar: Scrollbar): void => scrollbar.scrollByHandler(
         { x: location.left ?? 0, y: location.top ?? 0 },
-      ) as undefined,
+      ),
     );
   }
 
@@ -568,7 +570,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
   }
 
   @Method()
-  moveIsAllowed(event: DxMouseEvent): boolean {
+  moveIsAllowed(event: DxMouseEvent | DxMouseWheelEvent): boolean {
     if (this.props.disabled
       || (isDxMouseWheelEvent(event) && isCommandKeyPressed({
         ctrlKey: event.ctrlKey,
@@ -582,8 +584,8 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     }
 
     return isDxMouseWheelEvent(event)
-      ? this.validateWheel(event)
-      : this.validateMove(event);
+      ? this.validateWheel(event as DxMouseWheelEvent)
+      : this.validateMove(event as DxMouseEvent);
   }
 
   @Effect()
@@ -660,7 +662,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
   }
 
   getInitEventData(): {
-    getDirection: (event: DxMouseEvent) => string | undefined;
+    getDirection: (event: DxMouseWheelEvent) => string | undefined;
     validate: (event: DxMouseEvent) => boolean;
     isNative: boolean;
     scrollTarget: HTMLDivElement | null;
@@ -766,14 +768,14 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     const crossThumbScrolling = this.isCrossThumbScrolling(event);
 
     this.eventHandler(
-      (scrollbar): void => scrollbar.initHandler(event, crossThumbScrolling) as undefined,
+      (scrollbar: Scrollbar): void => scrollbar.initHandler(event, crossThumbScrolling),
     );
   }
 
   handleStart(event: DxMouseEvent): void {
     this.eventForUserAction = event;
 
-    this.eventHandler((scrollbar): void => scrollbar.startHandler() as undefined);
+    this.eventHandler((scrollbar: Scrollbar): void => scrollbar.startHandler());
 
     this.onStart();
   }
@@ -789,23 +791,23 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     this.adjustDistance(e, 'delta');
     this.eventForUserAction = e;
 
-    this.eventHandler((scrollbar): void => scrollbar.moveHandler(e.delta) as undefined);
+    this.eventHandler((scrollbar: Scrollbar): void => scrollbar.moveHandler(e.delta));
   }
 
   handleEnd(event: DxMouseEvent): void {
     this.adjustDistance(event, 'velocity');
     this.eventForUserAction = event;
-    this.eventHandler((scrollbar): void => scrollbar.endHandler(event.velocity, true) as undefined);
+    this.eventHandler((scrollbar: Scrollbar): void => scrollbar.endHandler(event.velocity, true));
   }
 
   handleStop(): void {
-    this.eventHandler((scrollbar): void => scrollbar.stopHandler() as undefined);
+    this.eventHandler((scrollbar: Scrollbar): void => scrollbar.stopHandler());
   }
 
   handleCancel(event: DxMouseEvent): void {
     this.eventForUserAction = event;
     this.eventHandler(
-      (scrollbar): void => scrollbar.endHandler({ x: 0, y: 0 }, false) as undefined,
+      (scrollbar: Scrollbar): void => scrollbar.endHandler({ x: 0, y: 0 }, false),
     );
   }
 
@@ -828,7 +830,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     return verticalScrolling || horizontalScrolling;
   }
 
-  adjustDistance(event: DxMouseEvent, property: string): void {
+  adjustDistance(event: DxMouseEvent, property: 'delta' | 'velocity'): void {
     const distance = event[property];
 
     distance.x *= this.validDirections[DIRECTION_HORIZONTAL] ? 1 : 0;
@@ -862,10 +864,10 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
   // https://trello.com/c/6TBHZulk/2672-renovation-cannot-use-getter-to-get-access-to-components-methods-react
   // eslint-disable-next-line max-len
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
-  validateEvent(event: DxMouseEvent, scrollbarRef: any): boolean {
+  validateEvent(event: DxMouseEvent, scrollbarRef: AnimatedScrollbar): boolean {
     const { scrollByThumb, scrollByContent } = this.props;
 
-    return (scrollByThumb && scrollbarRef.validateEvent(event) as boolean)
+    return (scrollByThumb && scrollbarRef.validateEvent(event))
     || (scrollByContent && this.isContent(event.originalEvent.target));
   }
 
@@ -895,7 +897,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     }
   }
 
-  tryGetAllowedDirection(event: DxMouseEvent): ScrollableDirection | undefined {
+  tryGetAllowedDirection(event: DxMouseWheelEvent): ScrollableDirection | undefined {
     return isDxMouseWheelEvent(event) ? this.wheelDirection(event) : this.allowedDirection();
   }
 
@@ -931,7 +933,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     return this.locked;
   }
 
-  validateWheel(event: DxMouseEvent): boolean {
+  validateWheel(event: DxMouseWheelEvent): boolean {
     const scrollbar = this.wheelDirection(event) === 'horizontal'
       ? this.hScrollbarRef.current!
       : this.vScrollbarRef.current!;
@@ -1069,7 +1071,7 @@ export class ScrollableSimulated extends JSXComponent<ScrollableSimulatedPropsTy
     this.scrollBy(distance);
   }
 
-  wheelDirection(event?: DxMouseEvent): ScrollableDirection {
+  wheelDirection(event?: DxMouseWheelEvent): ScrollableDirection {
     switch (this.props.direction) {
       case DIRECTION_HORIZONTAL:
         return DIRECTION_HORIZONTAL;
