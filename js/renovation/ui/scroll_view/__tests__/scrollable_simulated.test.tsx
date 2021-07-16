@@ -34,7 +34,7 @@ import {
 } from './utils';
 
 import { ScrollableTestHelper } from './scrollable_simulated_test_helper';
-import { DxKeyboardEvent, DxMouseEvent } from '../types';
+import { DxKeyboardEvent, DxMouseEvent, DxMouseWheelEvent } from '../types';
 import { AnimatedScrollbar } from '../animated_scrollbar';
 
 jest.mock('../../../../core/devices', () => {
@@ -671,9 +671,9 @@ describe('Simulated > Behavior', () => {
             ? direction
             : undefined;
 
-          const event = { ...defaultEvent, shiftKey } as unknown as DxMouseEvent;
+          const event = { ...defaultEvent, shiftKey };
           if (isDxWheelEvent) {
-            (event as any).type = 'dxmousewheel';
+            event.type = 'dxmousewheel';
           }
 
           if (isDxWheelEvent) {
@@ -683,7 +683,9 @@ describe('Simulated > Behavior', () => {
             }
           }
 
-          expect(helper.viewModel.tryGetAllowedDirection(event)).toBe(expectedDirectionResult);
+          expect(helper.viewModel
+            .tryGetAllowedDirection(event as unknown as DxMouseWheelEvent))
+            .toBe(expectedDirectionResult);
         });
 
       each([-1, 1]).describe('wheelDelta: %o', (delta) => {
